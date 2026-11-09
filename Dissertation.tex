@@ -1,0 +1,572 @@
+% \documentclass[12pt,a4paper,oneside]{book} % twoside for draf
+% \usepackage[percent]{overpic}
+% \usepackage{graphicx}
+% %\usepackage{babel}
+% \usepackage[utf8]{vietnam}
+% \usepackage[english]{babel}
+% %\usepackage{times}
+% \usepackage{mathptmx}	% same Time New Roma
+% \DeclareMathAlphabet{\mathcal}{OMS}{cmsy}{m}{n}
+% \usepackage{mathrsfs,amsmath}
+% \usepackage{graphicx}
+% \usepackage{subcaption}
+% \usepackage{float}
+% %\usepackage[cal = txupr]{mathalpha}
+% %\renewcommand{\rmdefault}{phv} % Arial
+% %\renewcommand{\sfdefault}{phv} % Arial
+% \usepackage{url}
+% \usepackage{pdflscape}
+% \usepackage{rotating}
+% \usepackage{afterpage}
+% %link to part by click on contents region
+% \usepackage{hyperref}
+% \hypersetup{
+%     colorlinks,
+%     citecolor=black,
+%     filecolor=black,
+%     linkcolor=black,
+%     urlcolor=black
+% }
+% \usepackage{subcaption}
+% \usepackage{fancyhdr}
+% \usepackage{algorithm2e}
+% \usepackage{amsmath}
+% \usepackage{array,tabularx}
+% \usepackage{amsfonts}
+% \usepackage{amssymb}
+% \usepackage{cases}
+% \usepackage{tabularx}
+% \usepackage{adjustbox}
+% \usepackage{multirow}
+% \usepackage{ textcomp }
+% \usepackage{bkthesis}
+% \usepackage{tikz}
+% \usetikzlibrary{shapes,arrows}
+% \usepackage[table,xcdraw]{xcolor}
+
+\documentclass[12pt, a4paper]{report}
+\usepackage{iftex}
+% Báo cáo biên dịch bằng LuaLaTeX (xem file latexmkrc): phông Latin Modern OpenType có đủ dấu tiếng Việt.
+% Nếu lỡ biên dịch bằng pdfLaTeX, báo cáo vẫn chạy với gói vietnam (vntex) như template gốc.
+\ifluatex
+  \usepackage{fontspec}
+\else
+  \usepackage[utf8]{inputenc}
+  \usepackage[utf8]{vietnam}
+\fi
+\usepackage{microtype}
+\usepackage{nomencl,etoolbox,ragged2e,siunitx}
+\usepackage[english]{babel}
+% Tên các thành phần bằng tiếng Việt (báo cáo viết bằng tiếng Việt)
+\addto\captionsenglish{%
+  \renewcommand{\contentsname}{Mục lục}%
+  \renewcommand{\listfigurename}{Danh sách hình vẽ}%
+  \renewcommand{\listtablename}{Danh sách bảng}%
+  \renewcommand{\chaptername}{Chương}%
+  \renewcommand{\figurename}{Hình}%
+  \renewcommand{\tablename}{Bảng}%
+  \renewcommand{\refname}{Tài liệu tham khảo}%
+  \renewcommand{\bibname}{Tài liệu tham khảo}%
+  \renewcommand{\appendixname}{Phụ lục}%
+}
+\usepackage{indentfirst, caption}
+\usepackage{subcaption}
+\usepackage[final]{graphicx}
+\usepackage[unicode]{hyperref}
+\hypersetup{
+    urlcolor=black,
+    linkcolor=black,
+    citecolor=black,
+    colorlinks=true,
+    hypertexnames=false   % tránh trùng anchor trang khi Chương 1 đặt lại số trang
+}
+% \usepackage[authoryear]{natbib}
+\usepackage[acronym]{glossaries}
+
+% table vertical
+\usepackage{lscape}
+
+% \usepackage{enumitem}
+% \usepackage[sorting=none]{biblatex}
+
+% \DefineBibliographyStrings{english}{%
+%   urlseen = {truy cập lần cuối:},
+% }
+
+% \DeclareFieldFormat{urldate}{\mkbibparens{\bibstring{urlseen}\space#1}}
+
+% Giữ footer ở trang chapter
+\makeatletter
+\patchcmd{\chapter}{plain}{fancy}{}{}
+\makeatother
+
+\newcommand{\DimensUnits}[2]{\hfill\makebox[8em]{#1\hfill}%
+\makebox[4em]{#2\hfill}\ignorespaces}
+\newcommand{\insertnomheaders}{\item[\bfseries Hàm]%
+\textbf{Chức năng}}
+\renewcommand\nomgroup[1]{%
+  \item[\Large\bfseries
+  \ifstrequal{#1}{B}{\uline{Base}}{%
+  \ifstrequal{#1}{D}{\uline{Dplyr}}{%
+  \ifstrequal{#1}{G}{\uline{Ggplot2}}{%
+  \ifstrequal{#1}{M}{\uline{Moments}}{% 
+  \ifstrequal{#1}{S}{\uline{Stats}}{%
+  \ifstrequal{#1}{U}{\uline{Utils}}{%
+  \ifstrequal{#1}{V}{\uline{VennDiagram}}{}}}}}}}]
+  \insertnomheaders
+  }
+
+\renewcommand*{\nompreamble}{\markboth{\nomname}{\nomname}}
+\renewcommand{\nomname}{...}
+\newcommand{\nomdescr}[1]{\parbox[t]{4cm}{\RaggedRight #1}}
+\newcommand{\nomwithdim}[5]{\nomenclature[#1]{#2}%
+{\nomdescr{#3}\DimensUnits{#4}{#5}}}
+
+\renewcommand{\acronymname}{Danh mục viết tắt}
+\makenomenclature
+%\usepackage[francais]{babel}
+\usepackage{a4wide,amssymb,epsfig,latexsym,array,float,hhline,fancyhdr}
+\usepackage[normalem]{ulem}
+%\usepackage{soul}
+
+\usepackage[makeroom]{cancel}
+\usepackage{amsmath}
+\usepackage{amsthm}
+\usepackage{multicol,longtable,amscd}
+\usepackage{diagbox}%Make diagonal lines in tables
+\usepackage[table,xcdraw,dvipsnames]{xcolor}
+\usepackage{booktabs}
+\usepackage{tikz}
+\usepackage{pgf-pie}
+\usepackage{rotating}
+\usepackage{alltt}
+\usepackage[framemethod=tikz]{mdframed}% For highlighting paragraph backgrounds
+\usepackage{caption,subcaption}
+\usepackage{tablefootnote}
+
+\usepackage{cite}
+
+% \usepackage{pdflscape}
+
+\usepackage{lastpage}
+% \usepackage[lined,boxed,commentsnumbered]{algorithm2e}
+\usepackage{enumitem}
+\usepackage{color}
+\usepackage{graphicx}							% Standard graphics package
+\usepackage{array}
+\usepackage{tabularx, caption}
+\usepackage{multirow}
+\usepackage{multicol}
+\usepackage{rotating}
+\usepackage{graphics}
+\usepackage{geometry}
+\usepackage{setspace}
+\usepackage{epsfig}
+\usepackage{tikz}
+\usetikzlibrary{arrows,backgrounds}
+\usepackage{changepage}
+\usepackage{adjustbox}
+\usepackage{tikz}
+\usetikzlibrary{shapes, arrows.meta, positioning}
+% \usepackage{algorithm2e}
+\usepackage[ruled,vlined]{algorithm2e}
+\usepackage{subfiles}
+
+\usepackage{makecell}
+
+%%%%% CROSSREF BIB
+\def\biblio{\bibliographystyle{amsalpha}\bibliography{bibgraf}} 
+
+%\usepackage{pstcol} 								% PSTricks with the standard color package
+
+\AtBeginDocument{\addtocontents{toc}{\protect\thispagestyle{empty}}} 
+
+\AtBeginDocument{%
+  \renewcommand\lstlistlistingname{Danh sách lệnh}
+  \renewcommand\lstlistingname{Mã lệnh}
+}
+
+\makeatletter
+\renewenvironment{thebibliography}[1]
+  {\section*{\refname}%
+   \@mkboth{\MakeUppercase\refname}{\MakeUppercase\refname}%
+   \list{\@biblabel{\arabic{enumiv}}}%
+        { \setlength\labelwidth{0pt}%
+          \setlength\leftmargin{0pt}%
+          \setlength\itemindent{0pt}%
+          \setlength\itemsep{0.5\baselineskip}%
+          \@openbib@code
+          \usecounter{enumiv}%
+        }%
+   \sloppy\clubpenalty4000\widowpenalty4000}
+  {\def\@noitemerr
+     {\@latex@warning{Empty `thebibliography' environment}}%
+   \endlist}
+\makeatother
+
+
+
+\usepackage[normalem]{ulem}
+\patchcmd{\chapter}{plain}{empty}{}{}
+\patchcmd{\part}{plain}{empty}{}{}
+\newtheorem{theorem}{{\bf Định lý}}
+\newtheorem{property}{{\bf Tính chất}}
+\newtheorem{proposition}{{\bf Mệnh đề}}
+\newtheorem{corollary}[proposition]{{\bf Hệ quả}}
+\newtheorem{lemma}[proposition]{{\bf Bổ đề}}
+\theoremstyle{definition}
+\newtheorem{exer}{Bài toán}
+
+\def\thesislayout{	% A4: 210 × 297
+	\geometry{
+		a4paper,
+		total={160mm,240mm},  % fix over page
+		left=30mm,
+		right=20mm,
+		top=25mm,
+		bottom=20mm,
+		headheight=18pt   % đủ chỗ cho header của fancyhdr
+	}
+}
+\thesislayout
+
+%%%
+\setcounter{secnumdepth}{4}
+\makeatletter
+\newcounter {subsubsubsection}[subsubsection]
+\renewcommand\thesubsubsubsection{\thesubsubsection .\@alph\c@subsubsubsection}
+\newcommand\subsubsubsection{\@startsection{subsubsubsection}{4}{\z@}%
+                                     {-3.25ex\@plus -1ex \@minus -.2ex}%
+                                     {1.5ex \@plus .2ex}%
+                                     {\normalfont\normalsize\bfseries}}
+\newcommand*\l@subsubsubsection{\@dottedtocline{3}{10.0em}{4.1em}}
+\newcommand*{\subsubsubsectionmark}[1]{}
+
+\makeatother
+
+% \everymath{\color{blue}}%make in-line maths symbols blue to read/check easily
+
+\sloppy
+% \captionsetup[figure]{labelfont={small,bf},textfont={small,it},belowskip=-1pt,aboveskip=-9pt}
+%space remove between caption, figure, and text
+\captionsetup[table]{labelfont={small,bf},textfont={small,it},belowskip=-1pt,aboveskip=7pt}
+
+\setlength{\floatsep}{5pt plus 2pt minus 2pt}
+\setlength{\textfloatsep}{5pt plus 2pt minus 2pt}
+\setlength{\intextsep}{10pt plus 2pt minus 2pt}
+
+\thesislayout
+%code
+\usepackage{listings}
+\usepackage{color} % tô màu cho code
+\definecolor{dkgreen}{rgb}{0,0.6,0}
+\definecolor{gray}{rgb}{0.5,0.5,0.5}
+\definecolor{mauve}{rgb}{0.58,0,0.82}
+
+\definecolor{codegreen}{rgb}{0,0.6,0}
+\definecolor{codegray}{rgb}{0.5,0.5,0.5}
+\definecolor{codepurple}{rgb}{0.58,0,0.82}
+\definecolor{backcolour}{rgb}{0.95,0.95,0.92}
+
+\lstset{
+    aboveskip=3mm,
+    belowskip=3mm,
+    columns=flexible,
+    backgroundcolor=\color{backcolour},   
+    commentstyle=\color{codegreen},
+    keywordstyle=\color{magenta},
+    numberstyle=\tiny\color{codegray},
+    stringstyle=\color{codepurple},
+    basicstyle=\ttfamily\footnotesize,
+    breakatwhitespace=false,         
+    breaklines=true,                 
+    captionpos=b,                    
+    keepspaces=true,                 
+    numbers=left,                    
+    numbersep=5pt,                  
+    showspaces=false,                
+    showstringspaces=false,
+    showtabs=false,                  
+    tabsize=2,
+    otherkeywords = {!,!=,~,\$,*,\&,\%/\%,\%*\%,\%\%, \%in\%,<-,<<-,/},
+    alsoletter={.,_}
+}
+
+% Glossary
+\makeglossaries
+
+\input{Bibliocosas/glossary.tex}
+
+\setstretch{1.25}
+% \setlength{\parskip}{1em}
+% \addbibresource{"References/references.bib"}
+
+% Mục lục và đánh số chỉ tới cấp section (1.1, 1.2, ...); subsection không đánh số,
+% không vào mục lục và được thụt lề bằng thụt đầu dòng của đoạn văn (\parindent).
+\setcounter{secnumdepth}{1}
+\setcounter{tocdepth}{1}
+\makeatletter
+\renewcommand\subsection{\@startsection{subsection}{2}{\z@}%
+    {-3.25ex\@plus -1ex \@minus -.2ex}%
+    {1.5ex \@plus .2ex}%
+    {\normalfont\fontsize{13}{16}\selectfont\bfseries\leftskip\parindent}}
+\makeatother
+
+% ---------------------------------------------------------------- quy tắc dòng cuối của đoạn
+% Dòng cuối của mọi đoạn văn (cả gạch đầu dòng, chú thích hình/bảng, ô bảng nhiều dòng) luôn có
+% ít nhất 2 từ: TeX không được ngắt dòng ở khoảng trắng ngay trước từ cuối, cũng không được tách
+% từ cuối (gạch nối, chỗ ngắt sau "_"). Luật tự áp dụng cho mọi đoạn, kể cả nội dung viết thêm sau này.
+% Ngoại lệ duy nhất: hai từ cuối dài hơn cả bề rộng dòng (cột bảng quá hẹp) thì TeX được ngắt để chữ
+% không tràn sang cột bên cạnh; khi đó nên nới cột hoặc viết lại ô đó.
+%  - LuaLaTeX: luật cứng, gắn vào bước ngắt dòng của TeX (pre_linebreak_filter), cùng cơ chế với
+%    tùy chọn lastparline của gói impnattypo nhưng tính theo số từ thay vì độ dài.
+%  - pdfLaTeX: không có bước này; dùng impnattypo [lastparline] để TeX ưu tiên dòng cuối dài hơn.
+\ifluatex
+\usepackage{luacode}
+\begin{luacode*}
+local GLUE, GLYPH, DISC, PENALTY, MATH, HLIST, VLIST, RULE =
+  node.id("glue"), node.id("glyph"), node.id("disc"), node.id("penalty"),
+  node.id("math"), node.id("hlist"), node.id("vlist"), node.id("rule")
+
+-- Khoảng trắng (ngoài công thức) gần nhất tính ngược từ nút n; nil nếu tới đầu đoạn hoặc gặp "\\".
+local function glue_before(n)
+  local in_math = false
+  while n do
+    local id = n.id
+    if id == MATH then
+      in_math = (n.subtype == 1)            -- đi ngược nên gặp điểm kết thúc công thức trước
+    elseif id == PENALTY and n.penalty <= -10000 then
+      return nil                            -- ngắt dòng bắt buộc: dòng cuối do người viết quyết định
+    elseif id == GLUE and not in_math then
+      return n
+    end
+    n = n.prev
+  end
+  return nil
+end
+
+local function last_line_two_words(head)
+  local last = node.tail(head)
+  -- bỏ qua \penalty10000 và \parfillskip mà TeX thêm vào cuối đoạn
+  while last and (last.id == GLUE or last.id == PENALTY) do last = last.prev end
+  if not last then return head end
+  local gap = glue_before(last)             -- khoảng trắng ngay trước từ cuối
+  if not gap then return head end           -- đoạn (hoặc ô bảng) chỉ có một từ: để nguyên
+  local before = glue_before(gap.prev)
+  local width = tex.hsize
+  local lw = tex.getdimen("linewidth")
+  if lw > 0 and lw < width then width = lw end
+  local w_last = node.dimensions(gap.next, last.next)
+  local w_prev = node.dimensions(before and before.next or head, gap)
+  if w_last > width then return head end    -- từ cuối dài hơn cả dòng: phải cho phép tách
+  local n = last                            -- giữ nguyên từ cuối: không gạch nối, không ngắt sau "_"
+  while n ~= gap do
+    if n.id == PENALTY or n.id == DISC then n.penalty = 10000 end
+    n = n.prev
+  end
+  if w_prev + gap.width + w_last <= width then  -- hai từ cuối vừa một dòng: cấm ngắt giữa chúng
+    local p = node.new(PENALTY)
+    p.penalty = 10000
+    head = node.insert_before(head, gap, p)
+  end
+  return head
+end
+
+luatexbase.add_to_callback("pre_linebreak_filter", last_line_two_words, "mp.lastline")
+\end{luacode*}
+\else
+\usepackage[lastparline]{impnattypo}
+\fi
+
+% ---------------------------------------------------------------- hình vẽ & số liệu
+\usepackage{pgfplots}
+\pgfplotsset{compat=1.18, /pgf/number format/use comma, /pgf/number format/1000 sep={.}}
+\usetikzlibrary{fit,calc,backgrounds,shapes.geometric}
+\usepackage{tabularx}
+% Định dạng số kiểu Việt Nam: 1.200.225 và 79.812,6
+\sisetup{group-separator={.}, output-decimal-marker={,}, group-minimum-digits=4}
+% Bảng màu trung tính dùng chung cho mọi hình (đồng bộ với các lược đồ quan hệ)
+\definecolor{mphead}{HTML}{324B64}
+\definecolor{mpline}{HTML}{64748B}
+\definecolor{mpfill}{HTML}{F8FAFC}
+\definecolor{mpborder}{HTML}{94A3B8}
+\definecolor{mpzone}{HTML}{EEF2F6}
+\definecolor{mpaccent}{HTML}{94A3B8}
+\tikzset{
+  % Không gạch nối từ trong khung hình (tránh "Sil-ver", "Ice-berg"); xuống dòng chỉ ở khoảng trắng.
+  every node/.append style={execute at begin node={\hyphenpenalty=10000\exhyphenpenalty=10000\relax}},
+  % Khung chỉ xuống dòng ở chỗ có "\\" do người viết đặt; #1 là bề rộng tối thiểu để các khung đều nhau.
+  mpbox/.style={draw=mpborder, fill=white, rounded corners=2pt, align=center, font=\footnotesize,
+                inner sep=4pt, minimum height=9mm, minimum width=#1},
+  mpbox/.default=26mm,
+  mphead/.style={draw=mphead, fill=mphead, text=white, rounded corners=2pt, align=center,
+                 font=\footnotesize\bfseries, inner sep=4pt, minimum height=9mm, minimum width=#1},
+  mphead/.default=26mm,
+  mpzone/.style={draw=mpborder, fill=mpzone, rounded corners=4pt, inner sep=7pt},
+  mpzonelabel/.style={font=\footnotesize\bfseries, text=mphead, anchor=north west},
+  mparrow/.style={-{Stealth[length=2.2mm]}, draw=mpline, thick},
+  mpdash/.style={-{Stealth[length=2.2mm]}, draw=mpline, thick, dashed},
+  mpnote/.style={font=\scriptsize, text=mpline, align=center},
+}
+
+% Giữ chỗ cho mục chưa có nội dung: xóa dòng \placeholder của mục khi bắt đầu viết mục đó.
+% (Nhờ có dòng này, LaTeX mới ngắt trang được giữa các tiêu đề còn trống.)
+\newcommand{\placeholder}{\par\noindent{\color{gray}\itshape (Nội dung sẽ được bổ sung)}\par}
+% Cho phép ngắt dòng sau dấu gạch dưới trong tên bảng/cột dài (\texttt{a\_b\_c})
+\DeclareRobustCommand{\_}{\textunderscore\allowbreak}
+% Tên định danh dài có dấu chấm/gạch ngang: \ident{marketing.raw.web-events.v1}
+\newcommand{\ident}[1]{\texttt{\identscan#1\relax}}
+\def\identscan#1{\ifx#1\relax\else#1\ifx#1.\allowbreak\fi\ifx#1-\allowbreak\fi\expandafter\identscan\fi}
+
+\begin{document}
+\def\biblio{}
+
+\begin{titlepage}
+
+
+\begin{tikzpicture}[remember picture,overlay,inner sep=0,outer sep=0]
+     \draw[black,line width=0.5pt] ([xshift=-1.5cm,yshift=-2cm]current page.north east) coordinate (A)--([xshift= 2.5cm,yshift=-2cm]current page.north west) coordinate(B)--([xshift=2.5cm,yshift=2cm]current page.south west) coordinate (C)--([xshift=-1.5cm,yshift=2cm]current page.south east) coordinate(D)--cycle;
+     
+     \draw[black,line width=4pt] ([xshift=-1.6cm,yshift=-2.1cm]current page.north east) coordinate (A)--([xshift= 2.6cm,yshift=-2.1cm]current page.north west) coordinate(B)--([xshift= 2.61cm,yshift=2.1cm]current page.south west) coordinate (C)--([xshift=-1.6cm,yshift=2.1cm]current page.south east) coordinate(D)--cycle;
+\end{tikzpicture}
+\begin{center}
+    \fontsize{13pt}{13pt}\selectfont
+    \textbf{ĐẠI HỌC QUỐC GIA THÀNH PHỐ HỒ CHÍ MINH}\\
+    \textbf{TRƯỜNG ĐẠI HỌC BÁCH KHOA}\\
+    \textbf{KHOA KHOA HỌC VÀ KỸ THUẬT MÁY TÍNH}
+\end{center}%%
+%%
+\begin{figure}[h!]
+    \centering
+    \includegraphics[width=5.5cm]{hcmut.png}
+\end{figure}%
+%%
+\begin{tikzpicture}
+    % Course name
+    \node at (.5\textwidth, 1.9) [name=CO5173]{\fontsize{16}{17}\selectfont\textbf{KỸ THUẬT DỮ LIỆU (CO5173)}};
+
+    % Upper horizontal line
+    \draw[thick] (0, 0.75) -- (\textwidth,0.75);
+
+    % Report type
+    \node at (.5\textwidth, 0) {\fontsize{15.8}{18}\selectfont\textbf{BÁO CÁO BÀI TẬP LỚN}};
+
+    % Project title (two lines)
+    \node at (.5\textwidth, -1) {\fontsize{15.8}{18}\selectfont\textbf{MarketPulse 360: Hệ thống Kỹ thuật Dữ liệu}};
+    \node at (.5\textwidth, -2) {\fontsize{15.8}{18}\selectfont\textbf{cho Phân tích Marketing Đa kênh}};
+
+    % Lower horizontal line
+    \draw[thick] (0, -2.75) -- (\textwidth,-2.75);
+    
+    % Major Information
+    %\node at (.5\textwidth, -3.15) {\fontsize{14}{16}\selectfont\textbf{Major: COMPUTER ENGINEERING}};
+\end{tikzpicture}
+% \begin{tikzpicture}
+%     \node at (.45\textwidth, 2) [name=CO2001]{\fontsize{15}{17}\selectfont\textbf{COMPUTER ENGINEERING PROJECT
+% }};
+%     \draw[thick,white] (-.5,.5) -- (.98\textwidth,.5);
+%     \node at (.5,0){\fontsize{14}{14}\selectfont\textbf{}};
+%     \node at (.475\textwidth, -1){\fontsize{15}{18}\selectfont\textbf{A PROGRAMMABLE ACCELERATOR FOR}};
+%     \node at (.475\textwidth, -2){\fontsize{15}{18}\selectfont\textbf{FLEXIBLE DEEP NEURAL NETWORK INFERENCE}};
+%     \node at (.475\textwidth, -5){\fontsize{14}{16}\selectfont\textbf{Major: COMPUTER ENGINEERING}};
+%     \draw[thick,white] (-.5,-2.7) -- (.98\textwidth,-2.7);
+% \end{tikzpicture}\par%5
+%%A Programmable Accelerator for Flexible Deep Neural Network Inference
+% \rule[0.4cm]{\linewidth}{0.3mm} 
+% \centering
+% {\Large \bfseries \MakeUppercase{Developing a monitoring tool for high-performance computing systems}}    
+
+% \rule{\linewidth}{0.2mm} \\[0.1cm]
+\vspace{.85cm}%%
+
+\begin{table}[h!]
+    \centering
+    \renewcommand{\arraystretch}{1.2}
+    \begin{tabular}{rll}
+        GVHD:         & PGS. TS. Võ Thị Ngọc Châu &         \\
+        Nhóm:         & 09                        &         \\
+        SVTH: & Trần Trọng Bách           & 2570779 \\
+                      & Lê Minh Huy               & 2570411 \\
+                      & Nguyễn Quang Thiện        & 2670376 \\
+                      & Nguyễn Khánh Nam          & 2670331
+    \end{tabular}
+\end{table}
+
+\begin{center}
+    %\vspace{1.5cm}
+    \vspace{2cm}
+    {TP. Hồ Chí Minh, Tháng 11 Năm 2026}
+\end{center}
+\thispagestyle{empty}
+\end{titlepage}
+
+\newpage
+
+\tableofcontents
+\listoffigures
+%\listofsymbols
+\listoftables
+%\listofalgorithms
+
+\fancypagestyle{plain}{%
+\fancyhf{}
+\fancyfoot[LE, RO]{\thepage}
+\renewcommand{\headrulewidth}{0.0pt}
+}
+
+\pagestyle{fancy}
+\renewcommand{\chaptermark}[1]{\markboth{\MakeUppercase{#1}}{}}
+\fancyhf{}
+\fancyhead[LE,RO]{\leftmark}
+\fancyhead[RE,LO]{}
+\fancyfoot[LE,RO]{\thepage}
+\renewcommand{\footrulewidth}{0.4pt}
+
+%\fancyhead{}  % Clears all page headers and footers
+%\rhead{\thepage}  % Sets the right side header to show the page number
+%\lhead{}  % Clears the left side page header
+%\fancyfoot[positions]{footer}
+%\renewcommand{\footrulewidth}{0.4pt}
+
+%\pagestyle{fancy}  % Finally, use the "fancy" page style to implement the FancyHdr headers
+
+
+% =============================================================================
+% NỘI DUNG — 6 chương theo report-structure.md
+% =============================================================================
+\newpage
+\chapter{Giới thiệu đề tài}
+\label{chap:gioi-thieu}
+\input{chapters/Chap1}
+
+\newpage
+\chapter{Dữ liệu và kiến trúc giải pháp}
+\label{chap:du-lieu-kien-truc}
+\input{chapters/Chap2}
+
+\newpage
+\chapter{Công nghệ xử lý dữ liệu}
+\label{chap:cong-nghe}
+\input{chapters/Chap3}
+
+\newpage
+\chapter{Ứng dụng Marketing Command Center}
+\label{chap:ung-dung}
+\input{chapters/Chap4}
+
+\newpage
+\chapter{Đánh giá thực nghiệm}
+\label{chap:danh-gia}
+\input{chapters/Chap5}
+
+\newpage
+\chapter{Thách thức và kết luận}
+\label{chap:ket-luan}
+\input{chapters/Chap6}
+
+
+\newpage
+\bibliographystyle{ieeetr}
+\bibliography{refs}
+
+\end{document}
