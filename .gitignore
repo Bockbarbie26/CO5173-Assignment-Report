@@ -1,0 +1,39 @@
+# Kết quả build: latexmk -pdf -outdir=build Dissertation.tex
+build/
+
+# File trung gian của LaTeX (khi lỡ build không có -outdir)
+*.aux
+*.bbl
+*.blg
+*.fdb_latexmk
+*.fls
+*.log
+*.lof
+*.lot
+*.out
+*.toc
+*.synctex.gz
+*.synctex(busy)
+*.acn
+*.acr
+*.alg
+*.glg
+*.glo
+*.gls
+*.ist
+*.nlo
+*.nls
+*.xdv
+
+# Tài liệu tham khảo cá nhân, không cần để build
+/*.pdf
+/report-structure.md
+
+# File của template gốc không còn được dùng
+/bkthesis.sty
+/cs.sty
+
+# Hệ điều hành
+.DS_Store
+Thumbs.db
+desktop.ini
