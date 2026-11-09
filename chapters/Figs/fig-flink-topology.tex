@@ -1,0 +1,28 @@
+% Hình 3.1 — Topology chuỗi toán tử của job Flink marketpulse-stream-v1
+\begin{tikzpicture}[op/.style={mpbox=36mm, font=\footnotesize, minimum height=16mm}]
+  % Hàng 1: đọc, kiểm tra, khử trùng lặp, phân loại trễ
+  \node[op] (src)  at (0,0)    {\textbf{raw-kafka-source}\\ 3 topic \texttt{raw}\\ watermark 5 phút};
+  \node[op] (val)  at (4.2,0)  {\textbf{parse-and-validate}\\ hợp đồng JSON v1};
+  \node[op] (ded)  at (8.4,0)  {\textbf{deduplicate-events}\\ keyBy \texttt{event\_id}\\ TTL 7 ngày};
+  \node[op] (late) at (12.6,0) {\textbf{classify-late-events}\\ ngưỡng sửa 10 phút};
+  % Hàng 2: các nhánh đầu ra
+  \node[op] (dlq)   at (0,-3.1)    {\textbf{validation-dlq}\\ bản ghi lỗi + mã lỗi};
+  \node[op] (clean) at (4.2,-3.1)  {\textbf{clean-event}\\ sự kiện sạch};
+  \node[op] (sess)  at (8.4,-3.1)  {\textbf{session-upserts}\\ keyBy \texttt{session\_id}\\ khoảng nghỉ 30 phút};
+  \node[op] (camp)  at (12.6,-3.1) {\textbf{campaign-state}\\ keyBy \texttt{metric\_key}};
+  % Hàng 3: sink duy nhất
+  \node[mphead=158mm, font=\footnotesize\bfseries, minimum height=11mm] (sink) at (6.3,-5.6)
+    {dynamic-kafka-sink \quad \mdseries EXACTLY\_ONCE, two-phase commit, tiền tố giao dịch \texttt{marketpulse-flink-v1-}};
+
+  \draw[mparrow] (src) -- (val);
+  \draw[mparrow] (val) -- (ded);
+  \draw[mparrow] (ded) -- (late);
+  % side output lỗi hợp đồng
+  \draw[mpdash] (val.south) -- ++(0,-0.6) -| node[pos=0.25, above, mpnote] {side output} (dlq.north);
+  % bus từ classify-late-events xuống ba nhánh
+  \draw[mpline, thick] (late.south) -- ++(0,-0.95) coordinate (bus);
+  \draw[mpline, thick] (bus) -| (clean.north |- bus);
+  \foreach \t in {clean,sess,camp} \draw[mparrow] (\t.north |- bus) -- (\t.north);
+  % mọi nhánh vào sink
+  \foreach \t in {dlq,clean,sess,camp} \draw[mparrow] (\t.south) -- (\t.south |- sink.north);
+\end{tikzpicture}
