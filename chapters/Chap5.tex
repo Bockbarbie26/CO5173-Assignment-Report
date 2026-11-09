@@ -1,0 +1,256 @@
+% =============================================================================
+% CHƯƠNG 5 — ĐÁNH GIÁ THỰC NGHIỆM GIẢI PHÁP KỸ THUẬT DỮ LIỆU VÀ ỨNG DỤNG
+% Số liệu lấy từ docs/evaluation/report.md, docs/runbooks/story-demo.md,
+% docs/architecture/mp07-decisions.md, mp08-decisions.md (repo @ dbe614b).
+% =============================================================================
+
+Đề bài yêu cầu đánh giá giải pháp trên ba mặt: tính đúng đắn của dữ liệu sau xử lý, hiệu năng của giải pháp Kỹ thuật Dữ liệu, và hiệu quả hỗ trợ khai thác dữ liệu qua ứng dụng. Chương này định nghĩa trước các độ đo, sau đó trình bày kết quả của từng mặt. Mọi tiêu chí đều được định nghĩa bằng công thức hoặc bằng phép so sánh chính xác với một oracle độc lập.
+
+\section{Môi trường và độ đo}
+\label{sec:c5-moi-truong}
+
+\subsection{Cấu hình môi trường thực nghiệm}
+\label{sec:c5-cau-hinh}
+Các thực nghiệm hiệu năng chạy trong một dự án Docker Compose cô lập (\texttt{compose.evaluation.yaml}) trên một máy với 15 CPU, 15,60~GiB bộ nhớ khả dụng, kiến trúc aarch64 và Docker Engine 29.4.0. Thực nghiệm xử lý luồng dùng Kafka 4.3.1 và Java 17, mỗi làn một partition, chu kỳ commit/checkpoint 1 giây cho cả hai động cơ. Thực nghiệm phục vụ phân tích giới hạn mỗi container CSDL ở 1,5~GiB bộ nhớ, tắt bộ nhớ đệm kết quả của ClickHouse, và chạy 20 lượt khởi động (warm-up) trước 100 lượt đo tuần tự cho mỗi truy vấn. Mỗi lượt đo luồng tạo một job hoặc ứng dụng mới. Các thực nghiệm hiệu năng là phép đo một lần trên máy cục bộ dùng chung, nên chỉ dùng để so sánh có kiểm soát giữa các phương án, không phải để suy ra năng lực sản xuất.
+
+\subsection{Định nghĩa các độ đo}
+\label{sec:c5-do-do}
+Với $N$ bản ghi đầu vào, $t^{\mathrm{send}}_i$ là thời điểm bản ghi $i$ được gửi và $t^{\mathrm{obs}}_i$ là thời điểm kết quả tương ứng được quan sát thấy \emph{đã commit}:
+
+\begin{itemize}
+    \item \textbf{Thông lượng} (bản ghi/giây): $\displaystyle \mathit{TP} = \frac{N}{\max_i t^{\mathrm{obs}}_i - \min_i t^{\mathrm{send}}_i}$.
+    \item \textbf{Độ trễ commit} của bản ghi $i$: $\ell_i = t^{\mathrm{obs}}_i - t^{\mathrm{send}}_i$, bao gồm thời gian xếp hàng và thời gian hiển thị giao dịch. Phân vị $p$ tính theo phương pháp \emph{nearest-rank}: $P_p = \ell_{(\lceil p \cdot n / 100 \rceil)}$ trên dãy $\ell$ đã sắp xếp tăng dần; báo cáo $P_{50}$, $P_{95}$, $P_{99}$.
+    \item \textbf{Thời gian phục hồi}: $T_{\mathrm{rec}} = t_{\mathrm{out}} - t_{\mathrm{fail}}$, trong đó $t_{\mathrm{fail}}$ là lúc gây sự cố và $t_{\mathrm{out}}$ là lúc đầu ra mới đầu tiên được commit.
+    \item \textbf{Thời gian CPU}: tổng mức tăng của bộ đếm CPU của các tiến trình liên quan trong cửa sổ đo; \textbf{bộ nhớ đỉnh}: giá trị lớn nhất của bộ nhớ làm việc được lấy mẫu.
+    \item \textbf{Độ trễ truy vấn / API}: thời gian thực của một truy vấn hoặc một request HTTP có xác thực, báo cáo $P_{50}$, $P_{95}$, $P_{99}$ trên 100 mẫu.
+    \item \textbf{Hệ số tăng tốc}: $S = P_{95}^{\mathrm{baseline}} / P_{95}^{\mathrm{candidate}}$.
+    \item \textbf{Tính đúng đắn}: một phép kiểm tra \emph{đạt} khi giá trị của hệ thống bằng \emph{chính xác} giá trị của oracle độc lập. Số tiền là số nguyên nên sai số cho phép bằng 0.
+\end{itemize}
+
+\section{Tính đúng đắn của dữ liệu}
+\label{sec:c5-dung-dan}
+
+\subsection{Hệ thống kiểm thử tự động}
+\label{sec:c5-kiem-thu}
+Kho mã có 683 hàm kiểm thử Python, 35 kiểm thử Java cho job Flink, 4 kiểm thử Java cho job đánh giá, 31 kiểm thử dữ liệu dbt và 20 file đặc tả kiểm thử giao diện bằng Playwright. Kiểm thử bao phủ toàn bộ đường ống: tính tất định của dữ liệu sinh, hợp đồng Kafka, thứ tự và tốc độ phát lại, khử trùng lặp, sự kiện trễ, phiên, chỉ số chiến dịch, quá trình nạp Bronze, quản trị Silver, các mô hình Gold, công bố và toàn bộ API. Ngoài kiểm thử đơn vị, các kịch bản Docker thật kiểm tra phục hồi sau sự cố, khởi động lại catalog/lưu trữ và dựng lại lịch sử cô lập.
+
+\subsection{Đối soát độc lập trên story-demo}
+\label{sec:c5-oracle}
+Script \texttt{story\_demo\_oracle.py} tính lại các chỉ số từ chính file nguồn của bộ sinh (không qua đường ống) rồi so với release đã kiểm chứng trên ClickHouse. Kết quả: \textbf{386/386 phép kiểm tra bằng nhau} (Bảng~\ref{tab:correctness}). Chênh lệch duy nhất giữa dữ liệu thô và dữ liệu đã kiểm chứng được giải thích trọn vẹn bởi quản trị: \num{33858} đơn hàng thô so với \num{32774} đơn đã kiểm chứng, chênh đúng \num{1084} đơn hàng không có đồng thuận phân tích.
+
+\begin{table}[H]
+\centering
+\caption{Kết quả đối soát tính đúng đắn của dữ liệu}
+\label{tab:correctness}
+\small
+\renewcommand{\arraystretch}{1.2}
+\begin{tabularx}{\textwidth}{>{\raggedright\arraybackslash}p{3.6cm} >{\raggedright\arraybackslash}X >{\raggedright\arraybackslash}p{3.2cm}}
+\toprule
+\textbf{Tập dữ liệu} & \textbf{Phép kiểm tra} & \textbf{Kết quả} \\
+\midrule
+Fixture & Doanh thu gộp \num{27160000}, hoàn \num{4967000}, ròng \num{22193000} VND bảo toàn qua cả ba mô hình phân bổ & Khớp tuyệt đối \\
+Story-demo & Hiển thị, click, chi phí của 4 nền tảng $\times$ 20 tháng (240 phép kiểm tra) & 240/240 \\
+Story-demo & Đơn hàng, doanh thu gộp, hoàn tiền theo tháng; doanh thu phân bổ theo nền tảng; doanh thu theo 13 tỉnh/thành và nhóm ẩn danh & Khớp, tổng cộng 386/386 \\
+Story-demo (Silver) & Email theo loại $\times$ tháng; phiên theo nguồn truy cập sau quản trị & 60/60, khớp \\
+Live View & Khách truy cập, phiên, đơn hàng, doanh thu so với file nguồn tại cùng thời điểm phát lại & Khớp tuyệt đối \\
+Evaluation 10k/100k & Mỗi đầu ra đã commit so với oracle Python; mã băm chuẩn hóa đầu vào/đầu ra giữa Flink và Kafka Streams & Khớp ở cả hai quy mô \\
+\bottomrule
+\end{tabularx}
+\end{table}
+
+\subsection{Đối chiếu đầu ra Flink và Kafka Streams}
+\label{sec:c5-tuong-duong}
+Trước khi so sánh tốc độ, hai động cơ phải cho cùng một kết quả. Khối lượng công việc tài chính tất định gồm cả bản ghi trùng, bản ghi sai giá trị, bản ghi trễ trong ngưỡng và trễ quá ngưỡng. Với mỗi đầu ra đã commit, một oracle Python độc lập kiểm tra tính đầy đủ của chuỗi, cách phân loại và số tiền trung gian theo từng chiến dịch. Kết quả xác nhận: bản ghi trùng không làm thay đổi tổng, giá trị sai không làm sai lệch số tiền, bản ghi trễ trong ngưỡng được tính và bản ghi trễ quá ngưỡng được ghi nhận rồi loại ra. Mã băm chuẩn hóa của đầu vào và đầu ra giống nhau giữa hai động cơ.
+
+\section{Flink và Kafka Streams}
+\label{sec:c5-flink-vs-streams}
+
+\subsection{Thông lượng và độ trễ}
+\label{sec:c5-thong-luong}
+Bảng~\ref{tab:flink-streams} và Hình~\ref{fig:flink-streams} cho thấy kết quả phụ thuộc rõ vào quy mô. Ở \texttt{eval-medium} (\num{100000} sự kiện), Flink đạt \num{79812.6} bản ghi/giây, gấp 1,53 lần Kafka Streams (\num{52039.8}), và độ trễ $P_{95}$ thấp hơn 33,6\% (\num{1094.34} ms so với \num{1648.05} ms). Ngược lại, ở \texttt{eval-small} (\num{10000} sự kiện), Kafka Streams nhanh hơn với \num{11394.2} bản ghi/giây và $P_{95}$ \num{858.45} ms so với \num{7887.2} bản ghi/giây và \num{1240.90} ms của Flink. Đây là kết quả hợp lý: Kafka Streams là thư viện nhúng nên khởi động nhẹ, phù hợp với tải nhỏ; khi tải tăng, động cơ phân tán của Flink mới phát huy lợi thế. Độ trễ ở đây bao gồm cả thời gian hiển thị giao dịch với chu kỳ commit 1 giây, nên không phải độ trễ từ sự kiện đến bảng điều khiển trong vận hành thực tế.
+
+\begin{table}[H]
+\centering
+\caption{Thông lượng và độ trễ commit của Apache Flink 2.2.1 và Kafka Streams 4.3.1}
+\label{tab:flink-streams}
+\small
+\renewcommand{\arraystretch}{1.2}
+\begin{tabular}{llrrrr}
+\toprule
+\textbf{Động cơ} & \textbf{Quy mô} & \textbf{Bản ghi/giây} & \textbf{$P_{50}$ (ms)} & \textbf{$P_{95}$ (ms)} & \textbf{$P_{99}$ (ms)} \\
+\midrule
+Flink & eval-small (10k) & \num{7887.2} & \num{1133.39} & \num{1240.90} & \num{1242.23} \\
+Kafka Streams & eval-small (10k) & \num{11394.2} & \num{852.90} & \num{858.45} & \num{858.76} \\
+Flink & eval-medium (100k) & \num{79812.6} & \num{1085.17} & \num{1094.34} & \num{1096.43} \\
+Kafka Streams & eval-medium (100k) & \num{52039.8} & \num{1635.03} & \num{1648.05} & \num{1651.72} \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\begin{figure}[H]
+\centering
+\begin{tikzpicture}
+\begin{axis}[
+    name=tp, ybar, width=0.47\textwidth, height=5.6cm, bar width=12pt,
+    ymin=0, ymax=95000, ylabel={Bản ghi/giây},
+    xtick={1,2}, xticklabels={10k sự kiện,100k sự kiện}, xmin=0.5, xmax=2.5,
+    legend style={at={(0.5,1.03)}, anchor=south, legend columns=2, font=\scriptsize, draw=none, /tikz/every even column/.append style={column sep=6pt}},
+    nodes near coords, every node near coord/.append style={font=\tiny, rotate=90, anchor=west},
+    tick label style={font=\footnotesize}, label style={font=\footnotesize},
+    scaled y ticks=false, yticklabel style={/pgf/number format/fixed},
+    axis x line*=bottom, axis y line*=left]
+  \addplot[fill=mphead, draw=mphead] coordinates {(1,7887.2) (2,79812.6)};
+  \addplot[fill=mpaccent, draw=mpline] coordinates {(1,11394.2) (2,52039.8)};
+  \legend{Flink, Kafka Streams}
+\end{axis}
+\begin{axis}[
+    at={(tp.east)}, anchor=west, xshift=1.8cm,
+    ybar, width=0.36\textwidth, height=5.6cm, bar width=22pt,
+    ymin=0, ymax=55, ylabel={Thời gian phục hồi (giây)},
+    xtick={1,2}, xticklabels={Flink,Kafka Streams}, xmin=0.4, xmax=2.6,
+    nodes near coords, every node near coord/.append style={font=\scriptsize},
+    tick label style={font=\footnotesize}, label style={font=\footnotesize},
+    axis x line*=bottom, axis y line*=left]
+  \addplot[fill=mphead, draw=mphead] coordinates {(1,4.48)};
+  \addplot[fill=mpaccent, draw=mpline, bar shift=0pt] coordinates {(2,45.28)};
+\end{axis}
+\end{tikzpicture}
+\caption{Thông lượng theo quy mô và thời gian phục hồi sau sự cố của Flink và Kafka Streams}
+\label{fig:flink-streams}
+\end{figure}
+
+\subsection{Thời gian phục hồi sau sự cố}
+\label{sec:c5-phuc-hoi}
+Khi tiến trình xử lý bị dừng đột ngột ở quy mô \texttt{eval-small}, Flink khôi phục từ checkpoint số 4 và có đầu ra mới được commit sau \num{4.476} giây. Kafka Streams giữ nguyên application ID và trạng thái cục bộ nhưng phải phát lại changelog của trạng thái, mất \num{45.277} giây, chậm hơn khoảng 10,1 lần. Với nhánh luồng của MarketPulse 360, nơi trạng thái gồm khử trùng lặp 7 ngày, phiên và chỉ số chiến dịch, khả năng phục hồi nhanh là yếu tố quyết định. Kết hợp với lợi thế ở tải lớn và các tính năng thời gian sự kiện, kết quả củng cố lựa chọn Flink làm động cơ chính. Cần lưu ý phạm vi so sánh: đây là một bộ tổng hợp tài chính giới hạn, chưa bao gồm gom phiên, toàn bộ xử lý hợp đồng và TTL trạng thái của job thật.
+
+\section{ClickHouse và PostgreSQL}
+\label{sec:c5-clickhouse-vs-postgres}
+
+\subsection{Độ trễ truy vấn theo quy mô}
+\label{sec:c5-do-tre-truy-van}
+Hai hệ thống được nạp cùng bảng sự kiện dạng Gold với tiền là số nguyên, ở ba quy mô 1, 10 và 20 triệu dòng, và chạy ba truy vấn đại diện: tổng theo nền tảng (\texttt{platform}), tổng theo chiến dịch và ngày (\texttt{campaign\_day}), và truy vấn lọc theo chiến dịch trong một khoảng ngày (\texttt{filtered}). PostgreSQL được tạo chỉ mục kép \texttt{(campaign, event\_day)}; ClickHouse sắp xếp dữ liệu theo \texttt{(campaign, event\_day, row\_id)}. Mọi lượt đo đều trả về đúng đáp án của oracle.
+
+\begin{table}[H]
+\centering
+\caption{Độ trễ truy vấn (ms) của ClickHouse 26.8 và PostgreSQL 17.6}
+\label{tab:ch-pg}
+\small
+\renewcommand{\arraystretch}{1.15}
+\begin{tabular}{llrrrrrr}
+\toprule
+ & & \multicolumn{3}{c}{\textbf{ClickHouse}} & \multicolumn{3}{c}{\textbf{PostgreSQL}} \\
+\cmidrule(lr){3-5}\cmidrule(lr){6-8}
+\textbf{Quy mô} & \textbf{Truy vấn} & $P_{50}$ & $P_{95}$ & $P_{99}$ & $P_{50}$ & $P_{95}$ & $P_{99}$ \\
+\midrule
+1M & filtered & \num{1.93} & \num{2.86} & \num{3.11} & \num{2.53} & \num{3.28} & \num{3.87} \\
+1M & platform & \num{7.13} & \num{11.04} & \num{12.22} & \num{32.03} & \num{38.43} & \num{49.69} \\
+1M & campaign\_day & \num{10.98} & \num{16.12} & \num{18.08} & \num{37.06} & \num{43.22} & \num{45.25} \\
+\midrule
+10M & filtered & \num{3.60} & \num{4.47} & \num{5.22} & \num{88.86} & \num{109.82} & \num{158.55} \\
+10M & platform & \num{47.88} & \num{53.59} & \num{54.39} & \num{333.15} & \num{422.23} & \num{617.17} \\
+10M & campaign\_day & \num{71.06} & \num{82.23} & \num{86.73} & \num{389.00} & \num{518.30} & \num{583.10} \\
+\midrule
+20M & filtered & \num{4.28} & \num{5.02} & \num{5.29} & \num{378.42} & \num{518.54} & \num{651.49} \\
+20M & platform & \num{98.07} & \num{109.05} & \num{122.08} & \num{740.74} & \num{826.55} & \num{1074.45} \\
+20M & campaign\_day & \num{148.52} & \num{196.89} & \num{221.05} & \num{849.06} & \num{977.09} & \num{1298.05} \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+Ở 1 triệu dòng, hai hệ thống gần như ngang nhau với truy vấn có chỉ mục (2,86 ms so với 3,28 ms). Khoảng cách nới rộng nhanh khi dữ liệu tăng (Hình~\ref{fig:ch-pg}): ở 20 triệu dòng, ClickHouse nhanh hơn 103,3 lần với \texttt{filtered} (5,02 ms so với 518,54 ms), 7,58 lần với \texttt{platform} và 4,96 lần với \texttt{campaign\_day} xét theo $P_{95}$. Nguyên nhân nằm ở cách lưu trữ: ClickHouse chỉ đọc các cột cần thiết và bỏ qua các khối dữ liệu không thỏa điều kiện nhờ khóa sắp xếp, trong khi PostgreSQL phải đọc từng dòng đầy đủ.
+
+\begin{figure}[H]
+\centering
+\begin{tikzpicture}
+\begin{axis}[
+    name=lat, ybar, ymode=log, width=0.5\textwidth, height=5.8cm, bar width=10pt,
+    ymin=1, ymax=3000, ylabel={$P_{95}$ ở 20M dòng (ms, thang log)},
+    xtick={1,2,3}, xticklabels={filtered,platform,campaign\_day}, xmin=0.5, xmax=3.5,
+    legend style={at={(0.5,1.03)}, anchor=south, legend columns=2, font=\scriptsize, draw=none, /tikz/every even column/.append style={column sep=6pt}},
+    nodes near coords, every node near coord/.append style={font=\tiny},
+    tick label style={font=\footnotesize}, label style={font=\footnotesize},
+    axis x line*=bottom, axis y line*=left, log origin=infty]
+  \addplot[fill=mphead, draw=mphead] coordinates {(1,5.02) (2,109.05) (3,196.89)};
+  \addplot[fill=mpaccent, draw=mpline] coordinates {(1,518.54) (2,826.55) (3,977.09)};
+  \legend{ClickHouse, PostgreSQL}
+\end{axis}
+\begin{axis}[
+    at={(lat.east)}, anchor=west, xshift=1.8cm,
+    ybar, width=0.42\textwidth, height=5.8cm, bar width=10pt,
+    ymin=0, ymax=620, ylabel={Thời gian CPU (giây)},
+    xtick={1,2,3}, xticklabels={1M,10M,20M}, xmin=0.5, xmax=3.5,
+    legend style={at={(0.5,1.03)}, anchor=south, legend columns=2, font=\scriptsize, draw=none, /tikz/every even column/.append style={column sep=6pt}},
+    nodes near coords, every node near coord/.append style={font=\tiny, rotate=90, anchor=west},
+    tick label style={font=\footnotesize}, label style={font=\footnotesize},
+    axis x line*=bottom, axis y line*=left]
+  \addplot[fill=mphead, draw=mphead] coordinates {(1,2.62) (2,15.37) (3,32.75)};
+  \addplot[fill=mpaccent, draw=mpline] coordinates {(1,16.94) (2,196.61) (3,485.16)};
+  \legend{ClickHouse, PostgreSQL}
+\end{axis}
+\end{tikzpicture}
+\caption{Độ trễ truy vấn $P_{95}$ ở 20 triệu dòng và thời gian CPU theo quy mô của ClickHouse và PostgreSQL}
+\label{fig:ch-pg}
+\end{figure}
+
+\subsection{Mức tiêu thụ tài nguyên}
+\label{sec:c5-tai-nguyen}
+Trong cùng khối lượng truy vấn, PostgreSQL tiêu tốn \num{485.16} giây CPU ở 20 triệu dòng, so với \num{32.75} giây của ClickHouse, tức tiết kiệm khoảng 14,8 lần. Đổi lại, ClickHouse dùng nhiều bộ nhớ hơn (đỉnh khoảng 1~GiB so với \num{534.2}~MiB của PostgreSQL) do xử lý theo khối cột lớn. Kết quả xác nhận cách phân công trong kiến trúc: ClickHouse cho truy vấn phân tích, PostgreSQL cho dữ liệu vận hành cần ràng buộc và giao dịch. Phương án Google BigQuery/BigLake không được đo nên không có kết luận về phương án này.
+
+\section{Hiệu quả của ứng dụng}
+\label{sec:c5-hieu-qua-ung-dung}
+
+\subsection{Kết quả các tác vụ ra quyết định}
+\label{sec:c5-decision-tasks}
+Hiệu quả của ứng dụng được đánh giá qua mười tác vụ ra quyết định, mỗi tác vụ gắn với một bên liên quan và một bằng chứng kiểm chứng độc lập (Bảng~\ref{tab:decision-tasks}). Một kịch bản tự động đăng nhập với vai trò \texttt{operator}, thực hiện từng tác vụ qua API và đối chiếu kết quả với oracle. Cả mười tác vụ đều đạt, và cấu hình được so sánh trước--sau để bảo đảm không ngân sách, quy tắc, phân đoạn hay bản phát hành nào bị thay đổi ngoài ý muốn.
+
+\begin{table}[H]
+\centering
+\caption{Mười tác vụ ra quyết định và kết quả kiểm chứng tự động}
+\label{tab:decision-tasks}
+\footnotesize
+\renewcommand{\arraystretch}{1.2}
+\begin{tabularx}{\textwidth}{>{\raggedright\arraybackslash}p{1.25cm} >{\raggedright\arraybackslash}p{2.2cm} >{\raggedright\arraybackslash}X >{\centering\arraybackslash}p{1.6cm}}
+\toprule
+\textbf{Mã} & \textbf{Bên liên quan} & \textbf{Tác vụ và quyết định cần đưa ra} & \textbf{Kết quả} \\
+\midrule
+DT-01 & Performance & So sánh KPI trực tiếp với doanh thu ròng đã kiểm chứng, chọn chiến dịch cần xem & Đạt \\
+DT-02 & Performance & Giải thích một cảnh báo vượt ngân sách từ ngưỡng và bằng chứng đã lưu & Đạt \\
+DT-03 & CMO & Đọc tiến độ giải ngân của chiến dịch trong kỳ cấu hình & Đạt \\
+DT-04 & CMO & Mô phỏng phân bổ ngân sách, hiểu giả định tuyến tính & Đạt \\
+DT-05 & Product & Xác định bước rơi rụng lớn trong phễu & Đạt \\
+DT-06 & Analyst & So sánh ba mô hình phân bổ, kiểm tra bảo toàn doanh thu & Đạt \\
+DT-07 & CRM & Xem dòng thời gian hồ sơ đã ẩn danh & Đạt \\
+DT-08 & CRM & Xem trước và lưu phân đoạn, chỉ kích hoạt khách có đồng thuận & Đạt \\
+DT-09 & CRM & Giải thích quần thể cohort và mẫu số hoạt động & Đạt \\
+DT-10 & CRM & Phân biệt khách giá trị cao với quyền được kích hoạt & Đạt \\
+\bottomrule
+\end{tabularx}
+\end{table}
+
+Thời gian API của kịch bản tự động không đồng nghĩa với thời gian một người dùng thật hoàn thành tác vụ. Nhóm đã chuẩn bị phiếu thử nghiệm với người dùng đại diện cho từng vai trò; phần quan sát này chưa được thực hiện trong phạm vi báo cáo.
+
+\subsection{Độ trễ của REST API}
+\label{sec:c5-api-latency}
+Bảng~\ref{tab:api-latency} tổng hợp độ trễ của các API chính, mỗi API đo 100 request HTTP có xác thực sau 20 lượt khởi động. API bảng điều khiển tổng hợp có $P_{95}$ là \num{54.35} ms; các API phân tích và vòng đời có $P_{95}$ từ \num{13.64} ms đến \num{32.39} ms; API minh họa hành trình chậm hơn (\num{77.84} ms) vì phải quét và chuẩn hóa nhiều điểm chạm. Tất cả đều nằm dưới ngưỡng 100 ms, đủ nhanh để người dùng thao tác liên tục mà không cảm thấy chờ.
+
+\begin{table}[H]
+\centering
+\caption{Độ trễ phản hồi của các REST API chính (ms)}
+\label{tab:api-latency}
+\small
+\renewcommand{\arraystretch}{1.15}
+\begin{tabular}{llrrr}
+\toprule
+\textbf{API} & \textbf{Tập dữ liệu} & $P_{50}$ & $P_{95}$ & $P_{99}$ / lớn nhất \\
+\midrule
+Bảng điều khiển tổng hợp & release fixture & \num{37.05} & \num{54.35} & \num{56.12} \\
+Phễu chuyển đổi & fixture & \num{13.85} & \num{26.58} & \num{41.58} \\
+Phân bổ doanh thu & fixture & \num{15.55} & \num{18.96} & \num{30.67} \\
+Hành trình mẫu (5 ví dụ) & fixture & \num{39.17} & \num{77.84} & \num{96.07} \\
+Cohort & fixture & \num{9.53} & \num{13.64} & \num{18.76} \\
+Danh sách hồ sơ & fixture & \num{20.80} & \num{28.53} & \num{34.63} \\
+Dòng thời gian hồ sơ & fixture & \num{19.84} & \num{22.00} & \num{23.11} \\
+Xem trước phân đoạn & fixture & \num{24.80} & \num{32.39} & \num{33.28} \\
+\bottomrule
+\end{tabular}
+\end{table}
