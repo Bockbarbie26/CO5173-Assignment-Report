@@ -1,0 +1,38 @@
+% Hình 2.1 — Kiến trúc tổng thể kết hợp Streaming và Batch
+\begin{tikzpicture}[b/.style={mpbox=27mm, minimum height=15mm}, h/.style={mphead=27mm, minimum height=15mm}]
+  % Nhánh luồng
+  \node[b] (s0) at (0,0)    {\textbf{Sự kiện}\\ web, app,\\ đơn hàng, email};
+  \node[b] (k1) at (3.6,0)  {\textbf{Apache Kafka}\\ topic \texttt{raw}};
+  \node[h] (fl) at (7.2,0)  {Apache Flink\\ \scriptsize\mdseries kiểm tra, khử trùng,\\ \scriptsize\mdseries gom phiên, chỉ số};
+  \node[b] (k2) at (10.8,0) {\textbf{Apache Kafka}\\ topic \texttt{clean}, \texttt{gold}};
+  \node[b] (lv) at (14.4,0) {\textbf{Serving workers}\\ ghi vào\\ ClickHouse live};
+  % Nhánh lô
+  \node[b] (b0) at (0,-3.4)    {\textbf{Quảng cáo,}\\ \textbf{CRM, danh mục}\\ (CSV/JSONL)};
+  \node[b] (br) at (3.6,-3.4)  {\textbf{Bronze}\\ Spark + Iceberg\\ trên MinIO};
+  \node[h] (sg) at (7.2,-3.4)  {Silver $\rightarrow$ Gold\\ \scriptsize\mdseries Spark, Iceberg, Nessie};
+  \node[b] (rc) at (10.8,-3.4) {\textbf{Release ứng viên}\\ ClickHouse,\\ dbt và đối soát};
+  \node[b] (pb) at (14.4,-3.4) {\textbf{Công bố}\\ \textbf{nguyên tử}\\ sổ cái PostgreSQL};
+  % Ứng dụng
+  \node[mphead=24mm, minimum height=20mm] (app) at (18.2,-1.7) {Command\\ Center\\[2pt] \scriptsize\mdseries FastAPI + Next.js};
+
+  \begin{scope}[on background layer]
+    \node[mpzone, fit=(s0)(lv)] (zs) {};
+    \node[mpzone, fit=(b0)(pb)] (zb) {};
+  \end{scope}
+  \node[mpzonelabel, anchor=south west] at (zs.north west) {Nhánh luồng (Streaming): độ trễ thấp, số liệu tạm thời};
+  \node[mpzonelabel, anchor=north west] at (zb.south west) {Nhánh lô (Batch): lịch sử đầy đủ, số liệu đã kiểm chứng};
+
+  \draw[mparrow] (s0) -- (k1);
+  \draw[mparrow] (k1) -- (fl);
+  \draw[mparrow] (fl) -- (k2);
+  \draw[mparrow] (k2) -- (lv);
+  \draw[mparrow] (b0) -- (br);
+  \draw[mparrow] (br) -- (sg);
+  \draw[mparrow] (sg) -- (rc);
+  \draw[mparrow] (rc) -- (pb);
+  \draw[mparrow] (lv.east) -- ++(0.6,0) |- ([yshift=4mm]app.west);
+  \draw[mparrow] (pb.east) -- ++(0.6,0) |- ([yshift=-4mm]app.west);
+  % Spark lưu trữ các topic Kafka vào Bronze
+  \draw[mpdash] (k1.south) -- node[left, mpnote, pos=0.5] {Spark đọc \texttt{read\_committed}} (br.north);
+  \draw[mpdash] (k2.south) -- ++(0,-0.55) -| ([xshift=4mm]br.north);
+\end{tikzpicture}
