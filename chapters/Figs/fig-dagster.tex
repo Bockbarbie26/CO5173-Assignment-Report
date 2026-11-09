@@ -1,0 +1,42 @@
+% Hình 3.2 — Đồ thị phụ thuộc 13 tài sản dữ liệu trên Dagster
+\begin{tikzpicture}[a/.style={mpbox=34mm}, ah/.style={mphead=34mm}]
+  % Giai đoạn 1: thu thập
+  \node[a] (man) at (0,1.25)   {\texttt{historical\_file\_}\\ \texttt{manifest}};
+  \node[a] (mas) at (4.2,2.9)  {\texttt{master\_data}};
+  \node[a] (ads) at (4.2,1.8)  {\texttt{ad\_reports}};
+  \node[a] (crm) at (4.2,0.7)  {\texttt{crm\_snapshots}};
+  \node[a] (kaf) at (4.2,-0.4) {\texttt{bounded\_kafka}};
+  % Giai đoạn 2: lakehouse
+  \node[a] (pin) at (8.4,1.25) {\texttt{pinned\_bronze}};
+  \node[a] (sil) at (8.4,-0.4) {\texttt{governed\_silver}};
+  \node[a] (gol) at (8.4,-2.0) {\texttt{marketing\_gold}};
+  % Giai đoạn 3: kiểm chứng và phục vụ
+  \node[a] (exp) at (13.4,-2.0) {\texttt{snapshot\_export}};
+  \node[a] (raw) at (13.4,-0.4) {\texttt{clickhouse\_raw\_}\\ \texttt{candidates} (8 bảng)};
+  \node[a] (dbt) at (13.4,1.25) {\texttt{marketing\_dbt}\\ (9 mô hình)};
+  \node[a] (cer) at (17.6,1.25) {\texttt{certified\_release}};
+  \node[ah] (act) at (17.6,-0.4) {\texttt{active\_release}};
+
+  % Ba vùng cùng chiều cao để nhãn thẳng hàng
+  \coordinate (t1) at (0,3.4);   \coordinate (b1) at (0,-2.5);
+  \coordinate (t2) at (8.4,3.4);
+  \coordinate (t3) at (13.4,3.4);
+  \begin{scope}[on background layer]
+    \node[mpzone, fit=(man)(mas)(kaf)(t1)(b1)] (z1) {};
+    \node[mpzone, fit=(pin)(gol)(t2)] (z2) {};
+    \node[mpzone, fit=(exp)(raw)(dbt)(cer)(act)(t3)] (z3) {};
+  \end{scope}
+  \node[mpzonelabel, anchor=south west] at (z1.north west) {Giai đoạn 1: Thu thập};
+  \node[mpzonelabel, anchor=south west] at (z2.north west) {Giai đoạn 2: Lakehouse};
+  \node[mpzonelabel, anchor=south west] at (z3.north west) {Giai đoạn 3: Kiểm chứng và phục vụ};
+
+  \foreach \t in {mas,ads,crm} \draw[mparrow] (man.east) -- (\t.west);
+  \foreach \t in {mas,ads,crm,kaf} \draw[mparrow] (\t.east) -- (pin.west);
+  \draw[mparrow] (pin) -- (sil);
+  \draw[mparrow] (sil) -- (gol);
+  \draw[mparrow] (gol) -- (exp);
+  \draw[mparrow] (exp) -- (raw);
+  \draw[mparrow] (raw) -- (dbt);
+  \draw[mparrow] (dbt) -- (cer);
+  \draw[mparrow] (cer) -- (act);
+\end{tikzpicture}
