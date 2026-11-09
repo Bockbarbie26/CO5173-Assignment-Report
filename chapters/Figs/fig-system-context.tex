@@ -1,0 +1,33 @@
+% Hình 1.1 — Bối cảnh hệ thống và luồng giá trị của MarketPulse 360
+\begin{tikzpicture}[node distance=2.5mm]
+  % Cột 1: nguồn dữ liệu
+  \node[mpbox=40mm] (ads) {\textbf{Báo cáo quảng cáo}\\ Google, Meta,\\ TikTok, Shopee};
+  \node[mpbox=40mm, below=of ads] (web) {\textbf{Sự kiện web/app}\\ hành vi, phiên, click};
+  \node[mpbox=40mm, below=of web] (orders) {\textbf{Đơn hàng}\\ tạo đơn, hoàn tiền};
+  \node[mpbox=40mm, below=of orders] (crm) {\textbf{CRM và danh mục}\\ khách hàng, chiến dịch,\\ sản phẩm};
+  \node[mpbox=40mm, below=of crm] (email) {\textbf{Email}\\ gửi, mở, click,\\ hủy đăng ký};
+  \begin{scope}[on background layer]
+    \node[mpzone, fit=(ads)(email)] (src) {};
+  \end{scope}
+  \node[mpzonelabel, anchor=south west] at (src.north west) {Nguồn dữ liệu};
+
+  % Cột 2: giải pháp
+  \node[mphead=58mm, right=14mm of ads.north east, anchor=north west] (core) {MarketPulse 360};
+  \node[mpbox=58mm, below=of core] (stream) {\textbf{Nhánh luồng}\\ Kafka $\rightarrow$ Flink\\ số liệu trực tiếp trong vài giây};
+  \node[mpbox=58mm, below=of stream] (batch) {\textbf{Nhánh lô}\\ Spark, Iceberg, Dagster\\ lịch sử Bronze -- Silver -- Gold};
+  \node[mpbox=58mm, below=of batch] (cert) {\textbf{Kiểm chứng}\\ dbt tests và đối soát tài chính\\ chỉ công bố release đúng từng đồng};
+  \node[mpbox=58mm, below=of cert] (serve) {\textbf{Phục vụ}\\ ClickHouse, PostgreSQL\\ số liệu đã kiểm chứng và trực tiếp};
+  \begin{scope}[on background layer]
+    \node[mpzone, fit=(core)(serve)] (mp) {};
+  \end{scope}
+  \node[mpzonelabel, anchor=south west] at (mp.north west) {Giải pháp Kỹ thuật Dữ liệu};
+
+  % Cột 3: ứng dụng và người dùng
+  \node[mphead=42mm, right=14mm of mp.east, anchor=west, yshift=14mm] (app) {Marketing\\ Command Center};
+  \node[mpbox=42mm, below=of app] (ui) {FastAPI + Next.js\\ 10 không gian làm việc};
+  \node[mpbox=42mm, below=9mm of ui] (users) {\textbf{Các bên liên quan}\\ CMO, Performance, CRM,\\ Analyst, Product,\\ Data Engineer, Privacy};
+
+  \draw[mparrow] (src.east) -- (mp.west |- src.east);
+  \draw[mparrow] (mp.east |- app.west) -- (app.west);
+  \draw[mparrow] (ui.south) -- node[right, mpnote] {ra quyết định} (users.north);
+\end{tikzpicture}
