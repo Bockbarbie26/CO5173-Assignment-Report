@@ -1,0 +1,23 @@
+% Hình 4.1 — Kiến trúc tầng ứng dụng
+% Trái sang phải: trình duyệt -> proxy -> API đọc dữ liệu; cột phải: các tiến trình nền ghi dữ liệu.
+\begin{tikzpicture}
+  % Luồng đọc
+  \node[mphead=26mm, minimum height=15mm] (ui) at (0,0) {Next.js 16\\[1pt] \scriptsize\mdseries 10 không gian\\ \scriptsize\mdseries làm việc};
+  \node[mpbox=29mm, minimum height=15mm] (proxy) at (3.45,0) {\textbf{Proxy}\\ \texttt{/api/v1/*}\\ chỉ chuyển tiếp\\ Cookie và Origin};
+  \node[mphead=30mm, minimum height=24mm] (api) at (7.0,0)
+    {FastAPI\\[2pt] \scriptsize\mdseries xác thực phiên, RBAC\\ \scriptsize\mdseries ghim release\\ \scriptsize\mdseries cho mỗi request\\[2pt] \scriptsize\mdseries 41 route};
+  % Kho dữ liệu
+  \node[mpbox=41mm, minimum height=14mm] (rel)  at (11.3,2.7)  {\textbf{ClickHouse release}\\ \texttt{mp\_release\_*}\\ \texttt{publication\_journal}};
+  \node[mpbox=41mm, minimum height=14mm] (side) at (11.3,0.9)  {\textbf{ClickHouse sidecar}\\ \texttt{mp\_journey\_*}\\ (hành trình khách hàng)};
+  \node[mpbox=41mm, minimum height=14mm] (live) at (11.3,-0.9) {\textbf{ClickHouse live}\\ \texttt{marketpulse\_live}};
+  \node[mpbox=41mm, minimum height=14mm] (pg)   at (11.3,-2.7) {\textbf{PostgreSQL}\\ \texttt{marketpulse\_app}\\ \texttt{marketpulse\_ops}};
+  % Tiến trình nền (ghi)
+  \node[mpbox=36mm, minimum height=14mm] (jp) at (15.85,0.9)  {\textbf{journey-publish}\\ chiếu Silver đã ghim};
+  \node[mpbox=36mm, minimum height=14mm] (wk) at (15.85,-0.9) {\textbf{campaign-worker}\\ \textbf{live-events-worker}\\ đọc Kafka \texttt{gold}, \texttt{clean}};
+
+  \draw[mparrow] (ui) -- (proxy);
+  \draw[mparrow] (proxy) -- (api);
+  \foreach \t in {rel,side,live,pg} \draw[mparrow] (api.east) -- (\t.west);
+  \draw[mparrow] (jp) -- (side);
+  \draw[mparrow] (wk) -- (live);
+\end{tikzpicture}
