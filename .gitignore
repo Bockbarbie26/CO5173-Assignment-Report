@@ -27,6 +27,7 @@ build/
 
 # Tài liệu tham khảo cá nhân, không cần để build
 /*.pdf
+!/CO5173-Report-Group09.pdf
 /report-structure.md
 
 # File của template gốc không còn được dùng
