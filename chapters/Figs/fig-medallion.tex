@@ -1,0 +1,35 @@
+% Hình 2.2 — Luồng biến đổi Medallion Bronze -> Silver -> Gold
+\begin{tikzpicture}[node distance=1.6mm, note/.style={mpnote, below=4mm}]
+  % Bronze
+  \node[mpbox=36mm] (b1) {\texttt{kafka\_records}};
+  \node[mpbox=36mm, below=of b1] (b2) {\texttt{source\_files}};
+  \node[mpbox=36mm, below=of b2] (b3) {\texttt{source\_file\_rows}};
+  % Silver
+  \node[mpbox=36mm, right=17mm of b1.north east, anchor=north west] (s1) {\texttt{customer\_events}};
+  \node[mpbox=36mm, below=of s1] (s2) {\texttt{campaigns}};
+  \node[mpbox=36mm, below=of s2] (s3) {\texttt{customers}};
+  \node[mpbox=36mm, below=of s3] (s4) {\texttt{products}};
+  \node[mpbox=36mm, below=of s4] (s5) {\texttt{ad\_spend\_daily}};
+  \node[mpbox=36mm, below=of s5] (s6) {\texttt{quality\_summary}};
+  % Gold
+  \node[mpbox=50mm, right=17mm of s1.north east, anchor=north west] (g1) {\texttt{campaign\_performance\_daily}};
+  \node[mpbox=50mm, below=of g1] (g2) {\texttt{funnel\_daily}};
+  \node[mpbox=50mm, below=of g2] (g3) {\texttt{attribution\_daily}};
+  \node[mpbox=50mm, below=of g3] (g4) {\texttt{customer\_360}};
+  \node[mpbox=50mm, below=of g4] (g5) {\texttt{cohort\_retention}};
+  \node[mpbox=50mm, below=of g5] (g6) {\texttt{commerce\_daily}};
+  \begin{scope}[on background layer]
+    \node[mpzone, fit=(b1)(b3)] (zb) {};
+    \node[mpzone, fit=(s1)(s6)] (zs) {};
+    \node[mpzone, fit=(g1)(g6)] (zg) {};
+  \end{scope}
+  \node[mpzonelabel, anchor=south west] at (zb.north west) {Bronze: bất biến (3 bảng)};
+  \node[mpzonelabel, anchor=south west] at (zs.north west) {Silver: chuẩn hóa (6 bảng)};
+  \node[mpzonelabel, anchor=south west] at (zg.north west) {Gold: phân tích (6 bảng)};
+
+  \draw[mparrow] (zb.east |- s2.west) -- (zs.west |- s2.west);
+  \draw[mparrow] (zs.east |- g3.west) -- (zg.west |- g3.west);
+  \node[note] at (zb.south) {giải mã payload,\\ kiểm tra hợp đồng,\\ khử trùng theo \texttt{event\_id},\\ khôi phục \texttt{click\_id},\\ lọc consent và bot};
+  \node[note] at (zs.south) {nối đa nguồn theo hồ sơ,\\ phân bổ doanh thu\\ trong cửa sổ 30 ngày,\\ tổng hợp theo ngày};
+  \node[note] at (zg.south) {xuất snapshot sang ClickHouse,\\ kiểm chứng bằng 9 mô hình dbt\\ và 31 bài kiểm thử};
+\end{tikzpicture}
