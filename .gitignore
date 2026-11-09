@@ -1,5 +1,7 @@
 # Kết quả build: latexmk -pdf -outdir=build Dissertation.tex
-build/
+# Chỉ giữ lại báo cáo PDF, bỏ qua mọi file trung gian trong build/
+build/*
+!build/Dissertation.pdf
 
 # File trung gian của LaTeX (khi lỡ build không có -outdir)
 *.aux
@@ -27,7 +29,6 @@ build/
 
 # Tài liệu tham khảo cá nhân, không cần để build
 /*.pdf
-!/CO5173-Report-Group09.pdf
 /report-structure.md
 
 # File của template gốc không còn được dùng
