@@ -1,7 +1,7 @@
-# Kết quả build: latexmk -pdf -outdir=build Dissertation.tex
+# Kết quả build: latexmk -pdf -outdir=build CO5173_Group09_Report.tex
 # Chỉ giữ lại báo cáo PDF, bỏ qua mọi file trung gian trong build/
 build/*
-!build/Dissertation.pdf
+!build/CO5173_Group09_Report.pdf
 
 # File trung gian của LaTeX (khi lỡ build không có -outdir)
 *.aux

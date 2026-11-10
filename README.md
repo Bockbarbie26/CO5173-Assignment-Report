@@ -55,19 +55,19 @@ sudo apt install texlive-full latexmk
 ```bash
 git clone https://github.com/ThienNguyen15/CO5173-Assignment-Report.git
 cd CO5173-Assignment-Report
-latexmk -pdf -outdir=build Dissertation.tex
+latexmk -pdf -outdir=build CO5173_Group09_Report.tex
 ```
 
-Kết quả: `build/Dissertation.pdf`. Mọi file trung gian (`.aux`, `.log`, `.bbl`, ...) cũng nằm trong `build/`, thư mục gốc luôn sạch.
+Kết quả: `build/CO5173_Group09_Report.pdf`. Tên file chứa mã nhóm theo đúng yêu cầu nộp bài của môn học, nên có thể nộp trực tiếp mà không cần đổi tên. Mọi file trung gian (`.aux`, `.log`, `.bbl`, ...) cũng nằm trong `build/`, thư mục gốc luôn sạch.
 
 Lệnh dùng cờ `-pdf` nhưng thực tế chạy **LuaLaTeX**: dòng `$pdflatex = 'lualatex %O %S';` trong `latexmkrc` thay `pdflatex` bằng `lualatex`. latexmk tự chạy LuaLaTeX, BibTeX rồi LuaLaTeX thêm cho tới khi mục lục và tham chiếu ổn định. Lần build đầu tiên có thể mất vài phút (tạo bộ nhớ đệm phông chữ, tải gói còn thiếu); các lần sau mất khoảng 45 giây.
 
 | Mục đích | Lệnh |
 |---|---|
-| Build PDF | `latexmk -pdf -outdir=build Dissertation.tex` |
-| Tự build lại mỗi khi lưu file | `latexmk -pdf -pvc -outdir=build Dissertation.tex` |
-| Xóa file trung gian, giữ lại PDF | `latexmk -c -outdir=build Dissertation.tex` |
-| Xóa toàn bộ kết quả build | `latexmk -C -outdir=build Dissertation.tex` |
+| Build PDF | `latexmk -pdf -outdir=build CO5173_Group09_Report.tex` |
+| Tự build lại mỗi khi lưu file | `latexmk -pdf -pvc -outdir=build CO5173_Group09_Report.tex` |
+| Xóa file trung gian, giữ lại PDF | `latexmk -c -outdir=build CO5173_Group09_Report.tex` |
+| Xóa toàn bộ kết quả build | `latexmk -C -outdir=build CO5173_Group09_Report.tex` |
 
 ### Build trong VS Code (LaTeX Workshop)
 
@@ -78,18 +78,18 @@ Lệnh dùng cờ `-pdf` nhưng thực tế chạy **LuaLaTeX**: dòng `$pdflate
    { "latex-workshop.latex.outDir": "%DIR%/build" }
    ```
 
-3. Mở `Dissertation.tex`, chọn *Build LaTeX project* (`Ctrl+Alt+B`). Recipe mặc định gọi `latexmk -pdf`, nên cũng tự chạy LuaLaTeX nhờ `latexmkrc`.
+3. Mở `CO5173_Group09_Report.tex`, chọn *Build LaTeX project* (`Ctrl+Alt+B`). Recipe mặc định gọi `latexmk -pdf`, nên cũng tự chạy LuaLaTeX nhờ `latexmkrc`.
 
 ### Build trên Overleaf
 
 1. *New Project* → *Upload Project*, tải lên file ZIP của repo (trên GitHub: *Code* → *Download ZIP*).
-2. *Menu* → *Settings*: chọn **Compiler: LuaLaTeX** và **Main document: Dissertation.tex**.
+2. *Menu* → *Settings*: chọn **Compiler: LuaLaTeX** và **Main document: CO5173_Group09_Report.tex**.
 
 ## Cấu trúc thư mục
 
 ```text
 .
-├── Dissertation.tex                    # File chính: preamble, trang bìa, mục lục và 6 chương
+├── CO5173_Group09_Report.tex           # File chính: preamble, trang bìa, mục lục và 6 chương
 ├── latexmkrc                           # Cấu hình latexmk: biên dịch bằng LuaLaTeX
 ├── refs.bib                            # Tài liệu tham khảo (BibTeX, kiểu IEEE)
 ├── hcmut.png                           # Logo trang bìa
@@ -141,7 +141,7 @@ Khi sửa sơ đồ: chọn nhóm bảng cần xuất → *Export image* → b�
 ## Ghi chú kỹ thuật
 
 - **Phông chữ:** Latin Modern (OpenType, nạp qua `fontspec`), hiển thị đủ dấu tiếng Việt.
-- **Quy tắc dòng cuối:** viết bằng Lua trong preamble của `Dissertation.tex` (callback `pre_linebreak_filter`), chỉ hoạt động với LuaLaTeX.
+- **Quy tắc dòng cuối:** viết bằng Lua trong preamble của `CO5173_Group09_Report.tex` (callback `pre_linebreak_filter`), chỉ hoạt động với LuaLaTeX.
 - **Dự phòng pdfLaTeX:** nếu lỡ biên dịch bằng pdfLaTeX, preamble tự chuyển sang gói `vietnam` (vntex) và gói `impnattypo`. Báo cáo vẫn ra PDF, nhưng quy tắc dòng cuối chỉ ở mức khuyến khích. Bản chính thức luôn build bằng LuaLaTeX.
 
 ## Xử lý sự cố
@@ -153,4 +153,4 @@ Khi sửa sơ đồ: chọn nhóm bảng cần xuất → *Export image* → b�
 | MiKTeX hỏi cài thêm gói | Chọn *Install*, hoặc bật tự cài gói trong MiKTeX Console → *Settings* |
 | Lần build đầu tiên rất lâu | LuaLaTeX đang tạo bộ nhớ đệm phông chữ; các lần sau nhanh hơn |
 | Tham chiếu hiện `??` hoặc trích dẫn hiện `[?]` | Build lại bằng `latexmk` (tự chạy đủ số lượt); kiểm tra khóa trong `refs.bib` |
-| File `.aux`, `.log` xuất hiện cạnh `Dissertation.tex` | Lệnh build thiếu `-outdir=build`, hoặc LaTeX Workshop chưa đặt `outDir`; xóa các file đó rồi build lại |
+| File `.aux`, `.log` xuất hiện cạnh `CO5173_Group09_Report.tex` | Lệnh build thiếu `-outdir=build`, hoặc LaTeX Workshop chưa đặt `outDir`; xóa các file đó rồi build lại |
