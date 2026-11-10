@@ -106,7 +106,7 @@ Lệnh dùng cờ `-pdf` nhưng thực tế chạy **LuaLaTeX**: dòng `$pdflate
 |---|---|
 | `chapters/Chap1.tex` | 1. Giới thiệu đề tài |
 | `chapters/Chap2.tex` | 2. Dữ liệu và kiến trúc giải pháp |
-| `chapters/Chap3.tex` | 3. Công nghệ xử lý dữ liệu |
+| `chapters/Chap3.tex` | 3. Công nghệ quản lý và xử lý dữ liệu |
 | `chapters/Chap4.tex` | 4. Ứng dụng Marketing Command Center |
 | `chapters/Chap5.tex` | 5. Đánh giá thực nghiệm |
 | `chapters/Chap6.tex` | 6. Thách thức và kết luận |
