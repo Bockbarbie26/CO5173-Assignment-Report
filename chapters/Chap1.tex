@@ -10,11 +10,11 @@
 \subsection{Bài toán marketing đa kênh trong bán lẻ}
 \label{sec:c1-bai-toan}
 
-Một doanh nghiệp bán lẻ tại Việt Nam hiện nay hiếm khi chỉ bán hàng qua một kênh. Cùng một lúc, doanh nghiệp chạy nhiều chiến dịch quảng cáo trên nhiều nền tảng khác nhau (Google Ads, Meta Ads, TikTok Ads và Shopee Ads), đưa người dùng về website và ứng dụng di động, ghi nhận đơn hàng và hoàn tiền trên hệ thống thương mại điện tử, quản lý hồ sơ khách hàng trong CRM và nuôi dưỡng khách hàng bằng các chiến dịch email. Mỗi hệ thống trên tự sinh ra báo cáo riêng với định dạng, độ trễ, đơn vị tiền tệ và định danh khác nhau: báo cáo quảng cáo của Google tính chi phí bằng \texttt{cost\_micros}, của Meta tính bằng chuỗi thập phân, của Shopee ghi ngày theo dạng \texttt{DD/MM/YYYY}; sự kiện web đến theo thời gian thực trong khi báo cáo quảng cáo và ảnh chụp CRM đến theo ngày.
+Các doanh nghiệp bán lẻ tại Việt Nam hiện nay hiếm khi chỉ bán hàng qua một kênh. Cùng một lúc, doanh nghiệp chạy nhiều chiến dịch quảng cáo trên nhiều nền tảng khác nhau (Google Ads, Meta Ads, TikTok Ads và Shopee Ads), đưa người dùng về website và ứng dụng di động, ghi nhận đơn hàng trên hệ thống thương mại điện tử, quản lý hồ sơ khách hàng trong CRM và nuôi dưỡng khách hàng bằng các chiến dịch email. Mỗi hệ thống trên tự sinh ra báo cáo riêng với định dạng, độ trễ, đơn vị tiền tệ và định danh khác nhau: báo cáo quảng cáo của Google tính chi phí bằng \texttt{cost\_micros}, của Meta tính bằng chuỗi thập phân, của Shopee ghi ngày theo dạng \texttt{DD/MM/YYYY}; sự kiện web đến theo thời gian thực trong khi báo cáo quảng cáo và ảnh chụp CRM đến theo ngày.
 
-Hệ quả là những câu hỏi kinh doanh cơ bản nhất, như \emph{chiến dịch nào thực sự mang lại doanh thu?}, \emph{ngân sách hôm nay có đang bị đốt vào kênh kém hiệu quả không?} hay \emph{khách hàng rời bỏ ở bước nào của phễu?}, lại không thể trả lời bằng bất kỳ báo cáo đơn lẻ nào. Các nền tảng quảng cáo cùng ``nhận công'' cho một đơn hàng, số liệu đơn hàng không khớp với số liệu chuyển đổi do nền tảng báo cáo, và mỗi phòng ban làm việc với một con số khác nhau.
+Hệ quả là những câu hỏi kinh doanh cơ bản nhất, như \emph{"chiến dịch nào thực sự mang lại doanh thu?"}, \emph{"ngân sách hôm nay có đang bị đốt vào kênh kém hiệu quả không?"} hay \emph{"khách hàng rời bỏ ở bước nào của phễu?"}, lại không thể trả lời bằng bất kỳ báo cáo đơn lẻ nào. Các nền tảng quảng cáo cùng ``nhận công'' cho một đơn hàng, số liệu đơn hàng không khớp với số liệu chuyển đổi do nền tảng báo cáo, và mỗi phòng ban làm việc với một con số khác nhau.
 
-Đề tài xây dựng \textbf{MarketPulse 360}, một sản phẩm dữ liệu marketing đầu-cuối nhằm chứng minh rằng giải pháp Kỹ thuật Dữ liệu có thể vừa \emph{đúng}, vừa \emph{nhanh}, vừa \emph{hữu ích} cho người dùng nghiệp vụ. Hệ thống tiếp nhận năm nhóm nguồn dữ liệu, xử lý song song theo hai nhánh luồng và lô, kiểm chứng tự động trước khi công bố, rồi phục vụ kết quả cho ứng dụng \emph{Marketing Command Center} (Hình~\ref{fig:system-context}). Toàn bộ mã nguồn, dữ liệu mô phỏng và bằng chứng kiểm thử được lưu trong kho mã của nhóm~\cite{mp360repo}.
+Nhằm giải quyết vấn đề này, nhóm xây dựng đề tài \textbf{MarketPulse 360}, một sản phẩm dữ liệu marketing đầu-cuối nhằm chứng minh rằng giải pháp Kỹ thuật Dữ liệu có thể vừa \emph{đúng}, vừa \emph{nhanh}, vừa \emph{hữu ích} cho người dùng nghiệp vụ. Hệ thống tiếp nhận năm nhóm nguồn dữ liệu, xử lý song song theo hai nhánh luồng và lô, kiểm chứng tự động trước khi công bố, rồi phục vụ kết quả cho ứng dụng \emph{Marketing Command Center} (Hình~\ref{fig:system-context}). Toàn bộ mã nguồn, dữ liệu mô phỏng và bằng chứng kiểm thử được lưu trong kho mã của nhóm~\cite{mp360repo}.
 
 \begin{figure}[H]
     \centering
@@ -35,10 +35,10 @@ Bài toán đặt ra hai yêu cầu kéo hệ thống về hai hướng ngược
 
 Không một công cụ đơn lẻ nào đáp ứng được cả hai. MarketPulse 360 giải quyết bằng cách tách hai loại số liệu một cách tường minh: số liệu \emph{trực tiếp} (tạm thời, cập nhật liên tục) và số liệu \emph{đã kiểm chứng} (chỉ được công bố sau khi vượt qua toàn bộ kiểm thử và đối soát). Hai loại số liệu không bao giờ bị cộng lẫn vào nhau trên giao diện.
 
-\section{Các bên liên quan}
+\section{Các bên liên quan (Stakeholders)}
 \label{sec:c1-stakeholders}
 
-Bảy nhóm người dùng được xác định từ quy trình ra quyết định marketing của một doanh nghiệp bán lẻ. Mỗi nhóm có câu hỏi riêng và cần dữ liệu ở độ chi tiết, độ trễ khác nhau.
+Từ quy trình ra quyết định Marketing của một doanh nghiệp bán lẻ, Nhóm xác định 7 bên liên quan. Mỗi bên có yêu cầu về dữ liệu ở độ chi tiết, độ trễ khác nhau.
 
 \subsection{Giám đốc Marketing (CMO)}
 \label{sec:c1-sh-cmo}
@@ -46,7 +46,7 @@ Chịu trách nhiệm phân bổ tổng ngân sách giữa các kênh. CMO cần
 
 \subsection{Quản lý quảng cáo (Performance Marketing)}
 \label{sec:c1-sh-performance}
-Vận hành chiến dịch hằng ngày. Người này cần chỉ số chiến dịch gần thời gian thực (phiên, đơn hàng, doanh thu theo chiến dịch), cảnh báo khi chi phí tăng đột biến hoặc vượt ngân sách, kèm bằng chứng để quyết định tạm dừng hay điều chỉnh giá thầu.
+Vận hành chiến dịch hằng ngày. Người dùng này cần chỉ số chiến dịch gần thời gian thực (phiên, đơn hàng, doanh thu theo chiến dịch), cảnh báo khi chi phí tăng đột biến hoặc vượt ngân sách, kèm bằng chứng để quyết định tạm dừng hay điều chỉnh giá thầu.
 
 \subsection{Chuyên viên CRM (Lifecycle Marketing)}
 \label{sec:c1-sh-crm}
@@ -62,16 +62,16 @@ Quan tâm đến hiệu quả ngành hàng, thiết bị mua sắm, giá trị �
 
 \subsection{Kỹ sư dữ liệu (Data Engineer)}
 \label{sec:c1-sh-engineer}
-Chịu trách nhiệm cho tính đúng và tính sẵn sàng của toàn bộ đường ống: theo dõi sức khỏe hệ thống, kết quả kiểm thử chất lượng, nguồn gốc (lineage) của từng bản phát hành, khả năng phát lại và tính lại lịch sử khi công thức thay đổi mà không mất dữ liệu cũ.
+Chịu trách nhiệm cho tính đúng và tính sẵn sàng của toàn bộ luồng dữ liệu: theo dõi sức khỏe hệ thống, kết quả kiểm thử chất lượng, nguồn gốc (lineage) của từng bản phát hành, khả năng phát lại và tính lại lịch sử khi công thức thay đổi mà không mất dữ liệu cũ.
 
 \subsection{Chủ sở hữu dữ liệu (Data Owner)}
 \label{sec:c1-sh-privacy}
 Bảo đảm dữ liệu cá nhân chỉ được dùng đúng mục đích: lọc theo đồng thuận, ẩn danh hóa định danh trên giao diện, phân quyền theo vai trò và lưu vết kiểm toán mọi truy cập.
 
-\section{Yêu cầu nghiệp vụ}
+\section{Yêu cầu nghiệp vụ (Business requirements)}
 \label{sec:c1-business-requirements}
 
-Nhóm gồm $n = 4$ thành viên nên đề bài yêu cầu tối thiểu $2n = 8$ yêu cầu nghiệp vụ. MarketPulse 360 xác định \textbf{10 yêu cầu} (\texttt{BR-01} đến \texttt{BR-10}), chia thành sáu nhóm nhu cầu. Với mỗi yêu cầu, phần dưới đây nêu rõ dữ liệu cần có và lý do không thể đáp ứng nếu thiếu giải pháp Kỹ thuật Dữ liệu.
+Nhóm xác định \textbf{10 yêu cầu nghiệp vụ} (\texttt{BR-01} đến \texttt{BR-10}), chia thành sáu nhóm nhu cầu. Với mỗi nhóm nhu cầu, phần dưới đây nêu rõ dữ liệu cần có và lý do không thể đáp ứng nếu thiếu giải pháp Kỹ thuật Dữ liệu.
 
 \subsection{Nhóm 1: Chiến dịch mang lại doanh thu (BR-01)}
 \label{sec:c1-br-group1}
@@ -117,13 +117,13 @@ Bảng~\ref{tab:br-matrix} tổng hợp ánh xạ giữa sáu nhóm nhu cầu, m
 \renewcommand{\arraystretch}{1.25}
 \begin{tabularx}{\textwidth}{>{\raggedright\arraybackslash}p{2.9cm} >{\raggedright\arraybackslash}p{3.4cm} >{\raggedright\arraybackslash}p{2.6cm} >{\raggedright\arraybackslash}X}
 \toprule
-\textbf{Nhóm nhu cầu} & \textbf{Yêu cầu} & \textbf{Bên liên quan} & \textbf{Năng lực Kỹ thuật Dữ liệu cần có} \\
+\textbf{Nhóm nhu cầu} & \textbf{Yêu cầu} & \textbf{Bên liên quan} & \textbf{Kỹ thuật Dữ liệu} \\
 \midrule
-1. Chiến dịch nào mang lại doanh thu & BR-01 Phân bổ đa mô hình & CMO và Analyst & Nối click--đơn hàng 30 ngày, phân bổ số nguyên bảo toàn tổng tiền \\
-2. Phản ứng tức thời & BR-02 Giám sát trực tiếp; BR-03 Cảnh báo; BR-04 Giải ngân; BR-05 Mô phỏng & Performance và CMO & Xử lý luồng có trạng thái, khử trùng lặp, chỉ số chi phí đã kiểm chứng \\
+1. Chiến dịch nào mang lại doanh thu & BR-01 Phân bổ đa mô hình & CMO và Data Analyst & Nối click--đơn hàng 30 ngày, phân bổ số nguyên bảo toàn tổng tiền \\
+2. Phản ứng tức thời & BR-02 Giám sát trực tiếp; BR-03 Cảnh báo; BR-04 Giải ngân; BR-05 Mô phỏng & Data Engineer, Data Analyst và CMO & Xử lý luồng có trạng thái, khử trùng lặp, chỉ số chi phí đã kiểm chứng \\
 3. Báo cáo đúng từng đồng & BR-06 Kiểm chứng trước công bố & Data Engineer và CMO & dbt tests, đối soát tài chính, công bố nguyên tử \\
-4. Hành vi và vòng đời & BR-07 Phễu; BR-08 Customer 360; BR-09 Cohort, sản phẩm, địa lý & CRM, Analyst và Product & Hợp nhất định danh, lịch sử nhiều tháng, mô hình Gold \\
-5--6. Quyền riêng tư, tính lại lịch sử & BR-10 Quản trị dữ liệu & Privacy và Data Engineer & Lọc consent trong đường ống, RBAC, snapshot Bronze bất biến \\
+4. Hành vi và vòng đời & BR-07 Phễu; BR-08 Customer 360; BR-09 Cohort, sản phẩm, địa lý & Lifecycle Marketing và Data Analyst & Hợp nhất định danh, lịch sử nhiều tháng, mô hình Gold \\
+5--6. Quyền riêng tư, tính lại lịch sử & BR-10 Quản trị dữ liệu & Data Owner Data Engineer & Lọc consent trong đường ống, RBAC, snapshot Bronze bất biến \\
 \bottomrule
 \end{tabularx}
 \end{table}

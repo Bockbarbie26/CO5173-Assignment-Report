@@ -6,7 +6,7 @@
 \section{Nguồn dữ liệu}
 \label{sec:c2-nguon-du-lieu}
 
-Dữ liệu marketing thật luôn gắn với thông tin cá nhân và bí mật kinh doanh, nên nhóm không dùng dữ liệu của doanh nghiệp có thật. Thay vào đó, gói \texttt{marketpulse\_mock} sinh ra một ``thế giới bán lẻ'' mô phỏng có tính \emph{tất định}: cùng một \texttt{seed} và cùng một cấu hình luôn cho ra cùng một bộ file, đến từng byte. Mỗi lần sinh dữ liệu đi kèm một \texttt{manifest.json} ghi lại cấu hình, mã băm SHA-256 của từng file, số dòng, mốc thời gian và số lượng bất thường đã tiêm vào. Nhờ vậy, mọi con số trong báo cáo đều có thể tái lập và đối chiếu lại với ``sự thật gốc'' (\emph{ground truth}) của bộ sinh.
+Dữ liệu marketing thật luôn gắn với thông tin cá nhân và bí mật kinh doanh, nên nhóm không dùng dữ liệu của doanh nghiệp có thật. Thay vào đó, nhóm sử dụng gói \texttt{marketpulse\_mock} sinh ra một ``thế giới bán lẻ'' mô phỏng: cùng một \texttt{seed} và cùng một cấu hình luôn cho ra cùng một bộ file, đến từng byte. Mỗi lần sinh dữ liệu đi kèm một \texttt{manifest.json} ghi lại cấu hình, mã băm SHA-256 của từng file, số dòng, mốc thời gian và số lượng bất thường đã tiêm vào. Nhờ vậy, mọi con số trong báo cáo đều có thể tái lập và đối chiếu lại với ``sự thật gốc'' (\emph{ground truth}) của bộ sinh.
 
 Định danh khách hàng, chiến dịch, phiên, click, đơn hàng và email được giữ nhất quán giữa các nguồn, nên dữ liệu vừa đủ ``bẩn'' để kiểm tra đường ống, vừa đủ chặt chẽ để đối soát. Bảng~\ref{tab:sources} tóm tắt các nguồn dữ liệu.
 
@@ -26,7 +26,7 @@ Dữ liệu marketing thật luôn gắn với thông tin cá nhân và bí mậ
 \texttt{google\_ads} & CSV theo ngày & mã chiến dịch của nền tảng & Chi phí tính bằng \texttt{cost\_micros} \\
 \texttt{meta\_ads} & JSONL theo ngày & mã chiến dịch của nền tảng & Chi phí là chuỗi thập phân, có cặp \texttt{date\_start}/\texttt{date\_stop} \\
 \texttt{tiktok\_ads} & CSV theo ngày & mã chiến dịch của nền tảng & Ngày ghi ở trường \texttt{stat\_time\_day} \\
-\texttt{shopee\_ads} & CSV theo ngày & mã quảng cáo & Ngày dạng \texttt{DD/MM/YYYY}, chi phí ở trường \texttt{expense} \\
+\texttt{shopee\_ads} & CSV theo ngày & mã quảng cáo & Định dạng ngày \texttt{DD/MM/YYYY}, chi phí ở trường \texttt{expense} \\
 \texttt{crm} & CSV, ảnh chụp hằng ngày & \texttt{customer\_id} & Hạng thành viên, giá trị vòng đời, cờ đồng thuận \\
 \texttt{master/*} & CSV & \texttt{campaign\_id}, \texttt{ad\_id}, \texttt{customer\_id}, \texttt{product\_id} & Danh mục chiến dịch, quảng cáo, khách hàng, sản phẩm \\
 \bottomrule
@@ -52,7 +52,7 @@ Bộ sinh hỗ trợ nhiều cấu hình quy mô, phục vụ những mục đí
 
 \begin{itemize}
     \item \textbf{fixture}: \num{615} dòng trong 22 file nén, được lưu ngay trong kho mã để kiểm thử tự động và tái lập nhanh.
-    \item \textbf{demo}: \num{1200225} dòng trong 130 file (khoảng 90\,MB) với \texttt{seed} 360, dùng để kiểm tra đường ống ở quy mô vừa.
+    \item \textbf{demo}: \num{1200225} dòng trong 130 file (khoảng 90\,MB) với \texttt{seed} 360, dùng để kiểm tra luồng dữ liệu ở quy mô vừa.
     \item \textbf{story-demo}: kịch bản \texttt{vietnam-retail} kéo dài 638 ngày, từ 01/01/2025 đến 30/09/2026, gồm \num{2576737} dòng trong \num{6342} file. Kịch bản mô phỏng 13 tỉnh/thành phố, bốn kênh quảng cáo (kể cả Shopee Ads), nhịp truy cập theo giờ Việt Nam (GMT+7), các đợt cao điểm như 11/11, Black Friday và Tết, cùng lưu lượng tự nhiên, trực tiếp và từ email. Đây là bộ dữ liệu dùng cho phần minh chứng ứng dụng ở Chương~\ref{chap:ung-dung}.
 \end{itemize}
 
@@ -78,7 +78,7 @@ Dữ liệu đến từ chín loại nguồn với hai định dạng (CSV và J
 \section{Kiến trúc tổng thể}
 \label{sec:c2-kien-truc}
 
-\subsection{Vòng đời dữ liệu bốn giai đoạn}
+\subsection{Vòng đời dữ liệu}
 \label{sec:c2-vong-doi}
 Dữ liệu trong MarketPulse 360 đi qua bốn giai đoạn: \emph{thu thập} (Kafka và kho lưu trữ đối tượng MinIO), \emph{xử lý} (Flink cho luồng, Spark cho lô), \emph{lưu trữ} (Iceberg cho lịch sử, ClickHouse cho phục vụ phân tích, PostgreSQL cho dữ liệu vận hành) và \emph{phân phối} (FastAPI và giao diện Next.js). Điểm then chốt của kiến trúc là cả hai nhánh xử lý đều bắt nguồn từ \emph{cùng một trục sự kiện Kafka} (Hình~\ref{fig:architecture}): số liệu trực tiếp và số liệu lịch sử vì vậy luôn được tính từ cùng một nguồn sự thật.
 
